@@ -1,30 +1,11 @@
 import config from 'config';
-import express, { Express } from 'express';
 import http from 'http';
-import compression from 'compression';
-import helmet from 'helmet';
-import bodyParser from 'body-parser';
 
-import wordCountEndpoint from './src/word-counter';
-import wordStatisticsEndpoint from './src/word-statistics';
-import { errorHandler } from './src/utils/error-handler';
 import databseConnection from './src/utils/database-connection';
 
-const app: Express = express();
+import app from './server';
 
 const PORT: number = parseInt(process.env.PORT as string, 10) || config.get('server.port');
-
-// Middlewares
-app.use(helmet());
-app.use(compression());
-app.use(bodyParser.text({ limit: '50gb' }));
-
-// Routing and endpoints
-app.use('/word-counter', wordCountEndpoint);
-app.use('/word-statistics', wordStatisticsEndpoint);
-
-// Error handling
-app.use(errorHandler);
 
 // Server
 const server: http.Server = app.listen(PORT, err => {
@@ -38,12 +19,9 @@ const server: http.Server = app.listen(PORT, err => {
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
-  console.info('SIGTERM signal received.');
-  console.log('Closing http server.');
+  console.info('Shutting down the server...');
 
   server.close(() => {
-    console.log('Http server closed.');
-
     databseConnection.close((err: Error | null) => {
       if (err) {
         console.error(err.message);

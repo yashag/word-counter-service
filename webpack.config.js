@@ -7,15 +7,15 @@ module.exports = {
     entry: './app.ts',
     target: 'node',
     externals: [
-      nodeExternals()
+        nodeExternals()
     ],
     module: {
         rules: [
             {
-                test: /\.tsx?$/,
+                test: /\.ts$/,
                 use: 'ts-loader',
-                exclude: /node_modules/,
-            },
+                exclude: /(node_modules|coverage|__tests__|.spec$)/
+            }
         ],
     },
     resolve: {

@@ -25,8 +25,6 @@ if (!fs.existsSync(dbPath)) {
     db = sqlite3.cached.Database(dbPath);
 }
 
-db = sqlite3.cached.Database(dbPath);
-
 function setupDatabaseDirectory() {
     fs.mkdirSync(path.dirname(dbPath), { recursive: true });
 }

@@ -12,7 +12,7 @@ export const getWordStatistics = async (req: Request, res: Response, next: NextF
             const counter: number = await queryWordCount(word);
             res.status(200).send(counter.toString());
         } catch(error) {
-            res.sendStatus(500);
+            next(error);
         }
     }
 };
