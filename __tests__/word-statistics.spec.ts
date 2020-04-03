@@ -1,5 +1,6 @@
 import supertest from 'supertest';
 
+import dbConnection from '../src/utils/database-connection';
 import app from '../server';
 import { countWordsInText } from '../src/word-counter/word-counter.service';
 
@@ -9,8 +10,18 @@ describe("words-statistics endpoint", () => {
 
   describe("GET /words-statistic", () => {
 
-    beforeAll(() => {
-      return countWordsInText(`customtestword customtestword customtestword`);
+    beforeAll(async (done) => {
+      dbConnection.get(`SELECT counter FROM words_statistics WHERE word = "customtestword"`, (err, row) => {
+        if (err) {
+          done(err);
+        } else if (row?.counter === 0) {
+          return countWordsInText(`customtestword customtestword customtestword`).then(() => {
+            done();
+          });
+        } else {
+          done();
+        }
+      });
     });
 
     const getWordStatisticsPath = '/word-statistics';
