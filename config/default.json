@@ -1,0 +1,8 @@
+{
+    "server": {
+        "port": 3000
+    },
+    "db": {
+        "path": "db/words_statistics_db.sqlite"
+    }
+}
