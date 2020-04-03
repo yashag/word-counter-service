@@ -10,7 +10,6 @@ Please clone/download the project and run the following commands to get the serv
 ```bash
 npm install
 npm start
-
 ```
 
 ## Testing
@@ -26,15 +25,17 @@ npm test
 
 ### word-counter endpoint
 
-An endpoint, which receives textual data, breaks it into words and keeps a count of the number of times it has already encountered said words. The endpoint is available through 3 methods:
+An endpoint, which receives textual data, breaks it into words and keeps a count of the number of times it has already encountered said words. There are 3 approaches to submitting textual content to the endpoint:
  
-1. A post request to **/word-counter**
+1. Through a body of a post request to **/word-counter**
 
 Details:
 
 ```http
 POST /word-counter
 Content-Type text/plain
+
+[Your input text goes here]
 ```
 
 Example:
@@ -43,7 +44,7 @@ Example:
 POST /word-counter
 Content-Type text/plain
 
-Body: Hi! My name is (what?), my name is (who?), my name is Slim Shady
+Hi! My name is (what?), my name is (who?), my name is Slim Shady
 ```
 
 Resulting in
@@ -59,7 +60,53 @@ Resulting in
 | slim | 1 |
 | shady | 1 |
 
-2. A file submission
+2. A file submission. It is done by sending the filepath in the body of a post request in the follwing way:
+
+```http
+POST /word-counter
+Content-Type application/json
+
+{
+    "filepath": [your filepath goes here]
+}
+```
+
+Example:
+
+```http
+POST /word-counter
+Content-Type application/json
+
+{
+    "filepath": "D:\\Documents\\large_file.txt"
+}
+```
+
+3. A url submission. It is done by sending the url in the body of a post request in the follwing way:
+
+```http
+POST /word-counter
+Content-Type application/json
+
+{
+    "url": [your filepath goes here]
+}
+```
+
+Example:
+
+```http
+POST /word-counter
+Content-Type application/json
+
+{
+    "url": "https://www.somefile.com/some/file.txt"
+}
+```
+
+#### Options
+
+**async** - default to `true`. By passing `?async=false` in the query paramters of any of the requests above, you can make the word count process block and allow other requests only when it finishes processing the current request.
 
 
 ### word-statistics endpoint
@@ -93,7 +140,8 @@ I had a lot of conflicting thoughts over which database to choose. So I decided 
 
 * **Data modeling:** My data is key-value, which could be considered a defined schema. It will not leverage hierarchical features or data relations, however. (Graph databases our out of the questions then. Still fits: key-value, columns, document, table)
 * **Persistence:** Since the data is key-value structured my initial thoughts were obviously Redis or Memcached. The problem is I am expecting to receive gigabytes of data, so my memory wouldn't be able to handle the data volume (and their persistency configuration options exist only for backups and not for flushing memory data). I then opted for LevelDB but found out it would work as expected only if the max file size is a couple of MB tops (which means I would end up with huge amounts of files as storage). Other LevelDB based solutions such as RocksDB were out of the questions as well (plus most are unsupported by Node.js).
-* **Consistency:** The words-statistics should return accurate data, which tips the balance to the RDBMS solutions slightly (some NoSQL databases prioritize consistency as well, but Cassandra's eventual consistency approach seemed inappropriate).
+* **Consistency:** I assumed the words-statistics ednpoint should return accurate data, which tips the balance to the RDBMS solutions slightly (some NoSQL databases prioritize consistency as well, but Cassandra's eventual consistency approach seemed inappropriate).
+Later on (specifically after seeing how long the text parsing and insertion process is), I reevaluated this idea and decided to allow both immidiate consistency (by blocking the service and making it *await* results) and eventual consitency (by running the text addition logic in async mode **defaultly**). It was too late to make huge changes, but I realized my initial assumtion was wrong and leveraging *Node.js* strongsuit in side-thread I/O operations is the best way to go (which means it is all about evnetual consistency).
 * **Read-write operations:** I realized my workload is mostly write-intensive. My reads are infrequent and do not require complex querying. I initially thought it tipped the scales back to NoSQL, but then realized that streaming my data and doing batch insertions (which should take milliseconds each) is also a fitting solution in my case. Locking and syncing data however is not something I wanted to manage, so I was okay with having one fast writer instead.
 * **Data storage:** This is the big one. I realized I can not assume that whoever downloads this project would have a pre-existing database setup. I also assumed that since storage is not cheap, I was not expected to provide a cloud-based data cluster or support distribution and scaling (without mentioning the data volume didn't justify it). That ended up ruling out solutions like MongoDB or CouchBase. My only viable solution at this point was an **embedded database**. Moreover, it had to able to handle gigabytes of data as previously stated (hence the aforementioned LevelDB didn't fit). NeDB seemed like an interesting option but a closer look reveiled it has been abandoned for some time and I was really wary of the support.
 
@@ -102,4 +150,4 @@ I admit I had a lot of second thoughts about this choice along the way, but I th
 
 #### Database client
 
-I was considering either *node-sqlite3* or *better-sqlite3*. True to its name *better-sqlite3* seemed like the more user-friendly version and according to them, it benchmarks better performance-wise. It is synchronous,  however, and I had felt that *sqlite3* asynchronous architecture would allow me to leverage my disregard for insertion order better. Also, there is a lack of proper documentation and support as it is, so I preferred to follow a more supported project;
+I was considering either *node-sqlite3* or *better-sqlite3*. True to its name *better-sqlite3* seemed like the more user-friendly version and according to them, it benchmarks better performance-wise. It is synchronous,  however, and I had felt that *sqlite3* asynchronous architecture would allow me to leverage my disregard for insertion order better as. Also, there is a lack of proper documentation and support as it is, so I preferred to follow a more supported project.
