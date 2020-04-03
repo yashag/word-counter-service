@@ -1,24 +1,33 @@
-import express, { Express } from 'express';
-import compression from 'compression';
-import helmet from 'helmet';
-import bodyParser from 'body-parser';
+import config from 'config';
+import http from 'http';
 
-import wordCountEndpoint from './src/word-counter';
-import wordStatisticsEndpoint from './src/word-statistics';
-import { errorHandler } from './src/utils/error-handler';
+import databseConnection from './src/utils/database-connection';
 
-const app: Express = express();
+import app from './app';
 
-// Middlewares
-app.use(helmet());
-app.use(compression());
-app.use(bodyParser.text({ limit: '50gb' }));
+const PORT: number = parseInt(process.env.PORT as string, 10) || config.get('server.port');
 
-// Routing and endpoints
-app.use('/word-counter', wordCountEndpoint);
-app.use('/word-statistics', wordStatisticsEndpoint);
+// Server
+const server: http.Server = app.listen(PORT, err => {
+  if (err) {
+    // tslint:disable-next-line: no-console
+    return console.error(err);
+  }
+  // tslint:disable-next-line: no-console
+  return console.log(`server is listening on ${PORT}`);
+});
 
-// Error handling
-app.use(errorHandler);
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.info('Shutting down the server...');
 
-export default app;
+  server.close(() => {
+    databseConnection.close((err: Error | null) => {
+      if (err) {
+        console.error(err.message);
+      }
+      console.log('SQLite connection closed.');
+      process.exit(0);
+    });
+  });
+});

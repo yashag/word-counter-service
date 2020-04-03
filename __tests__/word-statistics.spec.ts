@@ -1,7 +1,7 @@
 import supertest from 'supertest';
 
 import dbConnection from '../src/utils/database-connection';
-import app from '../server';
+import app from '../app';
 import { countWordsInText } from '../src/word-counter/word-counter.service';
 
 const request = supertest(app);

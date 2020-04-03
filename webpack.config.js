@@ -4,7 +4,7 @@ const nodeExternals = require("webpack-node-externals");
 module.exports = {
     name: 'deployment',
     mode: 'production',
-    entry: './app.ts',
+    entry: './server.ts',
     target: 'node',
     externals: [
         nodeExternals()
