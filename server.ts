@@ -10,10 +10,8 @@ const PORT: number = parseInt(process.env.PORT as string, 10) || config.get('ser
 // Server
 const server: http.Server = app.listen(PORT, err => {
   if (err) {
-    // tslint:disable-next-line: no-console
     return console.error(err);
   }
-  // tslint:disable-next-line: no-console
   return console.log(`server is listening on ${PORT}`);
 });
 

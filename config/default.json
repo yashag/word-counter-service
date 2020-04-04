@@ -6,6 +6,7 @@
         "path": "db/words_statistics_db.sqlite"
     },
     "fileParsing": {
+        "encoding": "utf8",
         "streamWaterMark": 128
     }
 }
