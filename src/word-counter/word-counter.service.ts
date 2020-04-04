@@ -23,6 +23,19 @@ export const countWordsInTextFile = (filepath: string): Promise<undefined> => {
     return handleStreamCount(readStream);
 }
 
+export function countWordsInText(text: string): Promise<undefined> {
+    const cleanedUpText: string = cleanUpText(text);
+
+    const calculatedStatistics: WordStatistics = cleanedUpText
+        .split(";")
+        .reduce((accumulator: { [key: string]: number; }, word: string) => {
+            accumulator[word] = (accumulator[word] || 0) + 1;
+            return accumulator;
+        }, {});
+
+    return insertWordStatistics(calculatedStatistics);
+};
+
 function handleStreamCount(stream: Readable): Promise<undefined> {
     return new Promise((resolve, reject) => {
         stream.on('data', (chunk: string) => {
@@ -36,16 +49,3 @@ function handleStreamCount(stream: Readable): Promise<undefined> {
         });
     });
 }
-
-function countWordsInText(text: string): Promise<undefined> {
-    const cleanedUpText: string = cleanUpText(text);
-
-    const calculatedStatistics: WordStatistics = cleanedUpText
-        .split(";")
-        .reduce((accumulator: { [key: string]: number; }, word: string) => {
-            accumulator[word] = (accumulator[word] || 0) + 1;
-            return accumulator;
-        }, {});
-
-    return insertWordStatistics(calculatedStatistics);
-};
