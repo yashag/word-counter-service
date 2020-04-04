@@ -14,7 +14,7 @@ describe("words-statistics endpoint", () => {
       dbConnection.get(`SELECT counter FROM words_statistics WHERE word = "customtestword"`, (err, row) => {
         if (err) {
           done(err);
-        } else if (row?.counter === 0) {
+        } else if (row === undefined || row?.counter === 0) {
           return countWordsInText(`customtestword customtestword customtestword`).then(() => {
             done();
           });
@@ -30,7 +30,7 @@ describe("words-statistics endpoint", () => {
       const response = await request.get(`${getWordStatisticsPath}?word=customtestword`)
       const result = parseInt(response.text, 10);
 
-      expect(response.status).toBe(200)
+      expect(response.status).toBe(200);
       expect(result).toBe(3);
       done();
     });
@@ -39,7 +39,7 @@ describe("words-statistics endpoint", () => {
       const response = await request.get(`${getWordStatisticsPath}?word=hello`);
       const result = parseInt(response.text, 10);
 
-      expect(response.status).toBe(200)
+      expect(response.status).toBe(200);
       expect(result).toEqual(0);
       done();
     });
@@ -47,7 +47,7 @@ describe("words-statistics endpoint", () => {
     it("fail when word is not provided", async done => {
       const response = await request.get(getWordStatisticsPath);
 
-      expect(response.status).toBe(400)
+      expect(response.status).toBe(400);
       expect(response.text).toBe("Bad Request");
       done();
     });
