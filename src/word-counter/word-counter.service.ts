@@ -48,6 +48,7 @@ export function countWordsInText(text: string): Promise<void> {
 
 function handleStreamCount(stream: Stream, origin: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
+        // I hope it won't be too big memory-wise
         const countPromises: Promise<void>[] = [];
         let chunkCount = 0;
 
