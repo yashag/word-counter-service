@@ -1,7 +1,6 @@
 import express, { Express } from 'express';
 import compression from 'compression';
 import helmet from 'helmet';
-import bodyParser from 'body-parser';
 
 import wordCountEndpoint from './src/word-counter';
 import wordStatisticsEndpoint from './src/word-statistics';
@@ -12,7 +11,8 @@ const app: Express = express();
 // Middlewares
 app.use(helmet());
 app.use(compression());
-app.use(bodyParser.text({ limit: '50gb' }));
+
+app.use(express.json());
 
 // Routing and endpoints
 app.use('/word-counter', wordCountEndpoint);

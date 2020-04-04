@@ -2,7 +2,7 @@ import dbConnection from '../utils/database-connection';
 
 import { WordStatistics } from './word-counter.types';
 
-export const insertWordStatistics = (calculatedStatistics: WordStatistics) => {
+export const insertWordStatistics = (calculatedStatistics: WordStatistics): Promise<undefined> => {
     return new Promise<undefined>((resolve, reject) => {
 
         const insertStatment = dbConnection.prepare(`INSERT INTO words_statistics (word, counter) VALUES(:word, :counter)

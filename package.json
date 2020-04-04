@@ -18,15 +18,14 @@
   "author": "Yasha Gootkin",
   "license": "ISC",
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/yashag/word-counter-service.git"
+    "type": "git",
+    "url": "https://github.com/yashag/word-counter-service.git"
   },
   "bugs": {
     "url": "https://github.com/yashag/word-counter-service/issues"
   },
   "homepage": "https://github.com/yashag/word-counter-service#readme",
   "dependencies": {
-    "body-parser": "^1.19.0",
     "compression": "^1.7.4",
     "config": "^3.3.1",
     "express": "^4.17.1",

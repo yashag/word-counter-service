@@ -134,6 +134,11 @@ Returns 3 if used after the *word-counter* example.
 
 I have chosen express since I am most familiar with it and it has the widest support. I have considered more optimized frameworks like *Koa* and *Fasitify* but decided it was not worth the risk for this project.
 
+#### Body parsing
+
+My initial instinct was to use the express built-in body parsing middleware (equivalent to the *body-parser* package) to handle reading request bodies. The problem is it obscures the stream based nature of a request object and reads the entire body.
+Since I am dealing with very large inputs here, I thought it was wiser for my logic to work only with streamed data (so I don't overload the memory and crash my server), which is why I eventually decided on using body parsing only on my short `json` type requests. When I receive a `text/plain` request, I would handle it myself and pass the data in chunks down to the database (the same way I am handling other word counting methods).
+
 #### Database
 
 I had a lot of conflicting thoughts over which database to choose. So I decided to cross out options based on the characteristics of my data needs:
