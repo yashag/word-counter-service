@@ -1,5 +1,7 @@
-import { Readable } from 'stream';
+import { Readable, Stream } from 'stream';
 import fs from 'fs';
+import util from 'util';
+import request from 'request';
 import config from 'config';
 
 import { cleanUpText } from '../utils/text-helpers';
@@ -7,14 +9,13 @@ import { cleanUpText } from '../utils/text-helpers';
 import { WordStatistics } from './word-counter.types';
 import { insertWordStatistics } from './word-counter.model';
 
-
-export const countWordsInTextBody = (req: Readable): Promise<undefined> => {
+export const countWordsInTextBody = (req: Readable): Promise<void> => {
     req.setEncoding('utf8');
 
     return handleStreamCount(req);
 }
 
-export const countWordsInTextFile = (filepath: string): Promise<undefined> => {
+export const countWordsInTextFile = (filepath: string): Promise<void> => {
     const readStream: fs.ReadStream = fs.createReadStream(filepath, {
         encoding: 'utf8',
         highWaterMark: (config.get('fileParsing.streamWaterMark') as number || 64) * 1024
@@ -23,7 +24,13 @@ export const countWordsInTextFile = (filepath: string): Promise<undefined> => {
     return handleStreamCount(readStream);
 }
 
-export function countWordsInText(text: string): Promise<undefined> {
+export const countWordsInTextFromURL = (url: string): Promise<void> => {
+    const readStream: request.Request = request.get(url, { encoding: 'utf8' });
+
+    return handleStreamCount(readStream);
+}
+
+export function countWordsInText(text: string): Promise<void> {
     const cleanedUpText: string = cleanUpText(text);
 
     const calculatedStatistics: WordStatistics = cleanedUpText
@@ -36,16 +43,20 @@ export function countWordsInText(text: string): Promise<undefined> {
     return insertWordStatistics(calculatedStatistics);
 };
 
-function handleStreamCount(stream: Readable): Promise<undefined> {
-    return new Promise((resolve, reject) => {
+function handleStreamCount(stream: Stream): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        const countPromises: Promise<void>[] = [];
+
         stream.on('data', (chunk: string) => {
-            countWordsInText(chunk);
+            countPromises.push(countWordsInText(chunk));
         });
 
         stream.on('error', reject);
 
         stream.on('end', () => {
-            resolve();
+            Promise.all(countPromises).then(() => {
+                resolve();
+            }).catch(reject);
         });
     });
 }

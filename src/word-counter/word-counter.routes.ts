@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 
-import { countWordsInTextBody, countWordsInTextFile } from './word-counter.service';
+import { countWordsInTextBody, countWordsInTextFile, countWordsInTextFromURL } from './word-counter.service';
 
 export const postWordCount = async (req: Request, res: Response, next: NextFunction) => {
     const asyncMode = req.query?.async === 'false' ? false : true;
@@ -18,7 +18,12 @@ export const postWordCount = async (req: Request, res: Response, next: NextFunct
                 next(error);
             }
         } else if (req.body.url) {
-            res.sendStatus(200);
+            try {
+                asyncMode ? countWordsInTextFromURL(req.body.url) : await countWordsInTextFromURL(req.body.url);
+                res.sendStatus(200);
+            } catch (error) {
+                next(error);
+            }
         } else {
             res.status(400).send("Could not find valid properties in the body. Was expecting either a 'filepath' or a 'url'");
         }

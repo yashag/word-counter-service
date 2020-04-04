@@ -5,11 +5,7 @@ export const selectWordCount = (word: string): Promise<number> => {
 
     return new Promise<number>((resolve, reject) => {
         dbConnection.get(selectQuery, [word], (err, row) => {
-            if(err) {
-                reject(err);
-            } else {
-                resolve(row?.counter ?? 0);
-            }
+            err ? reject(err) : resolve(row?.counter ?? 0);
         });
     });
 };
