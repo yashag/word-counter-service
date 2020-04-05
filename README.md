@@ -18,9 +18,6 @@ npm start
 npm test
 ```
 
-## Prerequisites
-
-
 ## API
 
 ### word-counter endpoint
@@ -130,6 +127,12 @@ GET /word-statistics?word=name
 ```
 
 Returns 3 if used after the *word-counter* example.
+
+
+## Input assumptions
+
+Aside from the textual input being potentially large (> 1GB) and some cleaning logic, I was not provided with a lot of specific instructions as to what to expect. Which is why I had to prepare for the worst case scenraio.
+Since I know that words repeat themselves and I intended to clean up most punctuation, the database storage I would require does not have to be as big as the input. However, I did not know how many inputs I would receive and what their contents would be. I could potentially have to accepts varied texts in multiple languages, making my database grow in size with every new word. Typos were also a possiblity. Which is why I had to assume my storage space should be able to contain gigabytes of data as well.
 
 
 ## Tech overview
